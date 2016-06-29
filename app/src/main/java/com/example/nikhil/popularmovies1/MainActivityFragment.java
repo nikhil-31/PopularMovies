@@ -13,6 +13,10 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.GridView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +51,7 @@ public class MainActivityFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             fetchMoviesTask moviesTask =  new fetchMoviesTask();
-            moviesTask.execute();
+            moviesTask.execute("top_rated");
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -82,11 +86,39 @@ public class MainActivityFragment extends Fragment {
         return rootView;
     }
 
-    public class fetchMoviesTask extends AsyncTask<Void,Void,Void>{
+    public class fetchMoviesTask extends AsyncTask<String,Void,String[]>{
         private final String LOG_TAG = fetchMoviesTask.class.getSimpleName();
 
+
+        private String[] getMoviesDataFromJson(String moviesJsonStr)
+            throws JSONException {
+
+
+            JSONObject movies = new JSONObject(moviesJsonStr);
+            JSONArray results = movies.getJSONArray("results");
+
+            String[] resultstrs = new String[results.length()];
+            for(int i=0;i<results.length();i++){
+                JSONObject jsonObject = results.getJSONObject(i);
+
+                String poster = jsonObject.optString("poster_path");
+                String overview = jsonObject.optString("overview");
+                String title = jsonObject.optString("original_title");
+                String release= jsonObject.optString("release_date");
+                float rating = Float.parseFloat(jsonObject.optString("vote_average").toString());
+
+                resultstrs[i] = poster+"-"+overview+"-"+title+"-"+release+"-"+rating;
+
+            }
+            for(String s:resultstrs){
+                Log.v(LOG_TAG,"Movies entry"+s);
+            }
+            return  resultstrs;
+        }
+
+
         @Override
-        protected Void doInBackground(Void ...params){
+        protected String[] doInBackground(String ...params){
 
 
             HttpURLConnection urlConnection = null;
@@ -97,10 +129,10 @@ public class MainActivityFragment extends Fragment {
             try{
 
 
-                String baseUrl = "http://api.themoviedb.org/3/movie/top_rated?";
+                String baseUrl = "http://api.themoviedb.org/3/movie/"+params[0]+"?";
                 String apikey = "api_key=" + BuildConfig.MOVIES_API_KEY;
                 URL url = new URL(baseUrl.concat(apikey));
-
+                //Log.v(LOG_TAG,"url"+url);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
@@ -141,6 +173,12 @@ public class MainActivityFragment extends Fragment {
                     }
                 }
             }
+            try {
+                return getMoviesDataFromJson(moviesJsonStr);
+                            } catch (JSONException e) {
+                                Log.e(LOG_TAG, e.getMessage(), e);
+                                e.printStackTrace();
+                           }
             return null;
         }
     }
