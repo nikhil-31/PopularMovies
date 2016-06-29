@@ -46,6 +46,8 @@ public class MainActivityFragment extends Fragment {
 
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
+            fetchMoviesTask moviesTask =  new fetchMoviesTask();
+            moviesTask.execute();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -121,6 +123,8 @@ public class MainActivityFragment extends Fragment {
                     return null;
                 }
                 moviesJsonStr = buffer.toString();
+
+                Log.v(LOG_TAG,"movie Data string"+ moviesJsonStr);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
 
