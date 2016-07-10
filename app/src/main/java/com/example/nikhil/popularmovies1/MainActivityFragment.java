@@ -1,6 +1,9 @@
 package com.example.nikhil.popularmovies1;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
@@ -12,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridLayout;
 import android.widget.GridView;
 
@@ -56,9 +60,28 @@ public class MainActivityFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
 
+            OnTaskCompleted taskCompleted = new OnTaskCompleted() {
+                @Override
+                public void onFetchMoviesTaskCompleted(Movie[] movies) {
+                    gridView.setAdapter(new ImageAdapter(getContext(), movies));
+                }
+            };
 
-            //fetchMoviesTask moviesTask =  new fetchMoviesTask();
-            //moviesTask.execute("top_rated");
+            fetchMoviesTask movieTask = new fetchMoviesTask(taskCompleted);
+            movieTask.execute("popular");
+            return true;
+        }
+        if (id == R.id.action_top_rated) {
+
+            OnTaskCompleted taskCompleted = new OnTaskCompleted() {
+                @Override
+                public void onFetchMoviesTaskCompleted(Movie[] movies) {
+                    gridView.setAdapter(new ImageAdapter(getContext(), movies));
+                }
+            };
+
+            fetchMoviesTask movieTask = new fetchMoviesTask(taskCompleted);
+            movieTask.execute("top_rated");
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -85,12 +108,39 @@ public class MainActivityFragment extends Fragment {
 
         fetchMoviesTask movieTask = new fetchMoviesTask(taskCompleted);
         movieTask.execute("top_rated");
-
-
-
-
+        gridView.setOnItemClickListener(movieclickListener);
         return rootView;
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+
+        int numMovie = gridView.getCount();
+        if(numMovie>0){
+            Movie[] movies = new Movie[numMovie];
+            for(int i=0;i<numMovie;i++){
+                movies[i] = (Movie) gridView.getItemAtPosition(i);
+            }
+
+            outState.putParcelableArray("PARCEL_MOVIE",movies);
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+    private final GridView.OnItemClickListener movieclickListener = new GridView.OnItemClickListener(){
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Movie movie = (Movie) parent.getItemAtPosition(position);
+
+            Intent intent = new Intent(getContext(),MovieDetailsActivity.class);
+            intent.putExtra("PARCEL_MOVIE",movie);
+
+            startActivity(intent);
+
+        }
+    };
 
     public class fetchMoviesTask extends AsyncTask<String,Void,Movie[]>{
         private final String LOG_TAG = fetchMoviesTask.class.getSimpleName();
@@ -121,13 +171,14 @@ public class MainActivityFragment extends Fragment {
                 resultstrs[i].setOriginalTitle(jsonObject.optString("original_title"));
                 resultstrs[i].setReleaseDate(jsonObject.optString("release_date"));
                 resultstrs[i].setVoteAverage(Float.parseFloat(jsonObject.optString("vote_average")));
+                resultstrs[i].setBackdrop(jsonObject.optString("backdrop_path"));
 
 
 
             }
-            for(Movie s:resultstrs){
-                Log.v(LOG_TAG,"Movies entry"+s);
-            }
+            //for(Movie s:resultstrs){
+                //Log.v(LOG_TAG,"Movies entry"+s);
+            //}
             return  resultstrs;
         }
 

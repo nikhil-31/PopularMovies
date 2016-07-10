@@ -7,4 +7,8 @@
         android:title="@string/action_refresh"
         android:id="@+id/action_refresh"
         app:showAsAction="never"></item>
+    <item
+        android:title="@string/action_top_rated"
+        android:id="@+id/action_top_rated"
+        app:showAsAction="never"></item>
 </menu>

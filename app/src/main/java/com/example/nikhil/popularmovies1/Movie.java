@@ -12,6 +12,7 @@ public class Movie implements Parcelable{
     private String mOverview;
     private Float mVoteAverage;
     private String mReleaseDate;
+    private String mBackdrop;
 
     public Movie(){
 
@@ -35,6 +36,15 @@ public class Movie implements Parcelable{
     }
     public void setReleaseDate(String releaseDate){
         mReleaseDate=releaseDate;
+    }
+
+    public void setBackdrop(String backdrop){
+        mBackdrop=backdrop;
+
+    }
+    public String getBackdrop(){
+        String back="http://image.tmdb.org/t/p/w500/"+mBackdrop;
+        return back;
     }
     public String getOriginalTitle(){
         return mOriginalTitle;
@@ -67,6 +77,7 @@ public class Movie implements Parcelable{
         dest.writeString(mOverview);
         dest.writeValue(mVoteAverage);
         dest.writeString(mReleaseDate);
+        dest.writeString(mBackdrop);
     }
 
     private Movie(Parcel in) {
@@ -75,6 +86,7 @@ public class Movie implements Parcelable{
         mOverview = in.readString();
         mVoteAverage = (Float) in.readValue(Double.class.getClassLoader());
         mReleaseDate = in.readString();
+        mBackdrop = in.readString();
     }
 
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
