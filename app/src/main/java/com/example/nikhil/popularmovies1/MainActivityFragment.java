@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridLayout;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,7 +46,7 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Add this line in order for this fragment to handle menu events.
+
         setHasOptionsMenu(true);
     }
 
@@ -99,17 +100,38 @@ public class MainActivityFragment extends Fragment {
 
         gridView = (GridView) rootView.findViewById(R.id.grid_view);
 
-        OnTaskCompleted taskCompleted = new OnTaskCompleted() {
-            @Override
-            public void onFetchMoviesTaskCompleted(Movie[] movies) {
-                gridView.setAdapter(new ImageAdapter(getContext(), movies));
-            }
-        };
 
-        fetchMoviesTask movieTask = new fetchMoviesTask(taskCompleted);
-        movieTask.execute("top_rated");
+        if(isOnline()) {
+            OnTaskCompleted taskCompleted = new OnTaskCompleted() {
+                @Override
+                public void onFetchMoviesTaskCompleted(Movie[] movies) {
+                    gridView.setAdapter(new ImageAdapter(getContext(), movies));
+                }
+            };
+
+
+            fetchMoviesTask movieTask = new fetchMoviesTask(taskCompleted);
+            movieTask.execute("top_rated");
+
+        }
+        else{
+            Toast.makeText(getContext(),"No Internet Connection",Toast.LENGTH_LONG).show();
+        }
+
+
         gridView.setOnItemClickListener(movieclickListener);
         return rootView;
+    }
+    public boolean isOnline() {
+
+        ConnectivityManager cm =
+
+                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 
     @Override
@@ -222,7 +244,7 @@ public class MainActivityFragment extends Fragment {
                 }
                 moviesJsonStr = buffer.toString();
 
-                Log.v(LOG_TAG,"movie Data string"+ moviesJsonStr);
+                //Log.v(LOG_TAG,"movie Data string"+ moviesJsonStr);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
 
