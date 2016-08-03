@@ -5,7 +5,7 @@
     tools:context="com.example.nikhil.popularmovies1.MainActivity">
     <item
         android:title="@string/action_refresh"
-        android:id="@+id/action_refresh"
+        android:id="@+id/action_popular"
         app:showAsAction="never"></item>
     <item
         android:title="@string/action_top_rated"

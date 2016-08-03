@@ -59,7 +59,7 @@ public class MainActivityFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
-        if (id == R.id.action_refresh) {
+        if (id == R.id.action_popular) {
 
             OnTaskCompleted taskCompleted = new OnTaskCompleted() {
                 @Override
